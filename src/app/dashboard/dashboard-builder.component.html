@@ -1,0 +1,268 @@
+<div class="dashboard-builder">
+  
+  <!-- Builder Toolbar -->
+  <div class="builder-toolbar">
+    <div class="toolbar-left">
+      <ejs-textbox [(value)]="dashboardTitle" placeholder="Dashboard Title" 
+                   floatLabelType="Auto" cssClass="dashboard-title-input"></ejs-textbox>
+      <span class="toolbar-divider"></span>
+      <button ejs-button cssClass="e-outline" [isPrimary]="isEditMode" 
+              (click)="toggleEditMode()">
+        <span class="e-btn-icon e-icons" [ngClass]="isEditMode ? 'e-edit' : 'e-eye'"></span>
+        {{ isEditMode ? 'Edit Mode' : 'View Mode' }}
+      </button>
+    </div>
+    
+    <div class="toolbar-right">
+      <button ejs-button cssClass="e-outline" (click)="showWidgetPanel = !showWidgetPanel">
+        <span class="e-btn-icon e-icons e-plus"></span> Widgets
+      </button>
+      <button ejs-button cssClass="e-outline" (click)="saveDashboard()">
+        <span class="e-btn-icon e-icons e-save"></span> Save
+      </button>
+      <button ejs-button cssClass="e-outline" (click)="exportDashboard()">
+        <span class="e-btn-icon e-icons e-export"></span> Export
+      </button>
+      <label class="import-btn">
+        <button ejs-button cssClass="e-outline">
+          <span class="e-btn-icon e-icons e-import"></span> Import
+        </button>
+        <input type="file" accept=".json" (change)="importDashboard($event)" hidden>
+      </label>
+      <button ejs-button cssClass="e-danger e-outline" (click)="resetDashboard()">
+        <span class="e-btn-icon e-icons e-reset"></span> Reset
+      </button>
+    </div>
+  </div>
+
+  <div class="builder-container">
+    
+    <!-- Widget Panel (Sidebar) -->
+    <div class="widget-panel" [class.collapsed]="!showWidgetPanel">
+      <div class="panel-header">
+        <h3>Available Widgets</h3>
+        <button ejs-button cssClass="e-small e-flat" iconCss="e-icons e-close"
+                (click)="showWidgetPanel = false"></button>
+      </div>
+      
+      <div class="widget-list">
+        <div class="widget-category">
+          <h4>Charts & Visualizations</h4>
+          <div class="widget-items">
+            <div *ngFor="let widget of availableWidgets" 
+                 class="widget-item"
+                 (click)="addWidget(widget)"
+                 title="Click to add">
+              <div class="widget-icon">
+                <span class="e-icons {{widget.icon}}"></span>
+              </div>
+              <div class="widget-info">
+                <div class="widget-name">{{widget.title}}</div>
+                <div class="widget-desc">{{widget.description}}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="widget-category">
+          <h4>Saved Dashboards</h4>
+          <div class="saved-dashboards">
+            <div *ngFor="let dashboard of savedDashboards" class="saved-dashboard-item">
+              <div class="saved-dashboard-info" (click)="loadDashboard(dashboard)">
+                <span class="e-icons e-dashboard"></span>
+                <div>
+                  <div class="saved-dashboard-title">{{dashboard.title}}</div>
+                  <div class="saved-dashboard-date">{{dashboard.createdAt | date:'short'}}</div>
+                </div>
+              </div>
+              <button ejs-button cssClass="e-small e-flat e-danger" 
+                      iconCss="e-icons e-delete"
+                      (click)="deleteDashboard(dashboard.id)"></button>
+            </div>
+            <div *ngIf="savedDashboards.length === 0" class="empty-state">
+              <span class="e-icons e-dashboard"></span>
+              <p>No saved dashboards</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dashboard Layout Area -->
+    <div class="dashboard-area">
+      <ejs-dashboardlayout #dashboardLayout
+                          [columns]="columns"
+                          [cellSpacing]="cellSpacing"
+                          [allowResizing]="allowResizing"
+                          [allowDragging]="allowDragging"
+                          [mediaQuery]="mediaQuery"
+                          (change)="onPanelChange($event)"
+                          (resizeStop)="onPanelResize($event)">
+        
+        <div *ngFor="let panel of panels" [id]="panel.id"
+             [attr.data-row]="panel.row"
+             [attr.data-col]="panel.col"
+             [attr.data-sizeX]="panel.sizeX"
+             [attr.data-sizeY]="panel.sizeY"
+             class="dashboard-panel"
+             [class.selected]="selectedWidget?.id === panel.id"
+             (click)="selectWidget(panel)">
+          
+          <!-- Panel Header -->
+          <div class="panel-header">
+            <div class="panel-title">
+              <span class="panel-icon e-icons" 
+                    [ngClass]="'e-' + panel.type"></span>
+              <input type="text" 
+                     [(ngModel)]="panel.title"
+                     class="panel-title-input"
+                     (click)="$event.stopPropagation()">
+            </div>
+            <div class="panel-actions" *ngIf="isEditMode">
+              <button ejs-button cssClass="e-small e-flat" 
+                      iconCss="e-icons e-settings"
+                      (click)="$event.stopPropagation()"></button>
+              <button ejs-button cssClass="e-small e-flat e-danger" 
+                      iconCss="e-icons e-close"
+                      (click)="removeWidget(panel.id); $event.stopPropagation()"></button>
+            </div>
+          </div>
+
+          <!-- Panel Content -->
+          <div class="panel-content">
+            
+            <!-- Line Chart Widget -->
+            <div *ngIf="panel.type === 'lineChart'" class="widget-content">
+              <ejs-chart [primaryXAxis]="lineChartConfig.primaryXAxis"
+                         [primaryYAxis]="lineChartConfig.primaryYAxis"
+                         [tooltip]="lineChartConfig.tooltip"
+                         height="100%">
+                <e-series-collection>
+                  <e-series [dataSource]="getWidgetData('lineChart')" 
+                           type="Line" xName="month" yName="value"
+                           name="Production" width="2" 
+                           [marker]="lineChartConfig.marker"
+                           fill="#667eea"></e-series>
+                </e-series-collection>
+              </ejs-chart>
+            </div>
+
+            <!-- Bar Chart Widget -->
+            <div *ngIf="panel.type === 'barChart'" class="widget-content">
+              <ejs-chart [primaryXAxis]="barChartConfig.primaryXAxis"
+                         [primaryYAxis]="barChartConfig.primaryYAxis"
+                         [tooltip]="barChartConfig.tooltip"
+                         height="100%">
+                <e-series-collection>
+                  <e-series [dataSource]="getWidgetData('barChart')" 
+                           type="Column" xName="month" yName="value"
+                           name="Production" fill="#f093fb"></e-series>
+                </e-series-collection>
+              </ejs-chart>
+            </div>
+
+            <!-- Pie Chart Widget -->
+            <div *ngIf="panel.type === 'pieChart'" class="widget-content">
+              <ejs-accumulationchart [legendSettings]="pieChartConfig.legendSettings"
+                                    height="100%">
+                <e-accumulation-series-collection>
+                  <e-accumulation-series [dataSource]="getWidgetData('pieChart')" 
+                                        xName="category" yName="value"
+                                        [dataLabel]="pieChartConfig.dataLabel"
+                                        type="Pie"></e-accumulation-series>
+                </e-accumulation-series-collection>
+              </ejs-accumulationchart>
+            </div>
+
+            <!-- Gauge Widget -->
+            <div *ngIf="panel.type === 'gauge'" class="widget-content gauge-widget">
+              <ejs-circulargauge height="100%">
+                <e-axes>
+                  <e-axis [minimum]="0" [maximum]="3000">
+                    <e-ranges>
+                      <e-range [start]="0" [end]="1500" color="#F03E3E" 
+                              [startWidth]="15" [endWidth]="15"></e-range>
+                      <e-range [start]="1500" [end]="2250" color="#FFDD00" 
+                              [startWidth]="15" [endWidth]="15"></e-range>
+                      <e-range [start]="2250" [end]="3000" color="#30B32D" 
+                              [startWidth]="15" [endWidth]="15"></e-range>
+                    </e-ranges>
+                    <e-pointers>
+                      <e-pointer [value]="getWidgetData('gauge')" 
+                                type="Marker" markerShape="Triangle"
+                                [markerHeight]="15" [markerWidth]="15"></e-pointer>
+                    </e-pointers>
+                  </e-axis>
+                </e-axes>
+              </ejs-circulargauge>
+              <div class="gauge-value">{{getWidgetData('gauge') | number:'1.0-0'}} PSI</div>
+            </div>
+
+            <!-- KPI Widget -->
+            <div *ngIf="panel.type === 'kpi'" class="widget-content kpi-widget">
+              <div class="kpi-display">
+                <div class="kpi-label">Total Production</div>
+                <div class="kpi-value">{{getWidgetData('kpi').value | number}}</div>
+                <div class="kpi-change" [class.positive]="getWidgetData('kpi').change > 0">
+                  <span class="e-icons e-arrow-up"></span>
+                  {{getWidgetData('kpi').change}}%
+                </div>
+              </div>
+            </div>
+
+            <!-- Grid Widget -->
+            <div *ngIf="panel.type === 'grid'" class="widget-content">
+              <ejs-grid [dataSource]="getWidgetData('grid')"
+                        [allowPaging]="gridConfig.allowPaging"
+                        [pageSettings]="gridConfig.pageSettings"
+                        [allowSorting]="gridConfig.allowSorting"
+                        [allowFiltering]="gridConfig.allowFiltering"
+                        height="100%">
+                <e-columns>
+                  <e-column field="wellId" headerText="Well ID" width="120"></e-column>
+                  <e-column field="status" headerText="Status" width="100"></e-column>
+                  <e-column field="production" headerText="Production" width="130" 
+                           textAlign="Right" format="N0"></e-column>
+                  <e-column field="efficiency" headerText="Efficiency %" width="130" 
+                           textAlign="Right" format="N0"></e-column>
+                </e-columns>
+              </ejs-grid>
+            </div>
+
+            <!-- Sparkline Widget -->
+            <div *ngIf="panel.type === 'sparkline'" class="widget-content sparkline-widget">
+              <ejs-sparkline [dataSource]="getWidgetData('sparkline')" 
+                            xName="month" yName="value"
+                            type="Line" height="100%" width="100%"
+                            [lineWidth]="2" fill="#667eea">
+              </ejs-sparkline>
+            </div>
+
+            <!-- Map Widget Placeholder -->
+            <div *ngIf="panel.type === 'map'" class="widget-content map-widget">
+              <div class="placeholder">
+                <span class="e-icons e-location"></span>
+                <p>Map visualization</p>
+                <small>Configure your map data source</small>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </ejs-dashboardlayout>
+
+      <!-- Empty State -->
+      <div *ngIf="panels.length === 0" class="empty-dashboard">
+        <div class="empty-content">
+          <span class="e-icons e-dashboard"></span>
+          <h3>Start Building Your Dashboard</h3>
+          <p>Click on widgets from the left panel to add them to your dashboard</p>
+          <button ejs-button cssClass="e-primary" (click)="showWidgetPanel = true">
+            <span class="e-btn-icon e-icons e-plus"></span> Add Widgets
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,252 @@
+<div class="oil-field-dashboard">
+  <!-- Dashboard Header -->
+  <div class="dashboard-header">
+    <div class="header-content">
+      <h1>Oil Field Operations Dashboard</h1>
+      <div class="header-actions">
+        <button ejs-button cssClass="e-info" (click)="refreshDashboard()">
+          <span class="e-btn-icon e-icons e-refresh"></span> Refresh
+        </button>
+        <ejs-daterangepicker placeholder="Select Date Range"></ejs-daterangepicker>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="kpi-section">
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <span class="e-icons e-oil"></span>
+      </div>
+      <div class="kpi-content">
+        <div class="kpi-label">Total Production</div>
+        <div class="kpi-value">{{kpiData.totalProduction | number}} bbl</div>
+        <div class="kpi-change positive">
+          <span class="e-icons e-arrow-up"></span> {{kpiData.productionChange}}%
+        </div>
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+        <span class="e-icons e-check-circle"></span>
+      </div>
+      <div class="kpi-content">
+        <div class="kpi-label">Active Wells</div>
+        <div class="kpi-value">{{kpiData.activeWells}}/5</div>
+        <div class="kpi-change positive">
+          <span class="e-icons e-check"></span> Operational
+        </div>
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+        <span class="e-icons e-performance"></span>
+      </div>
+      <div class="kpi-content">
+        <div class="kpi-label">Avg Efficiency</div>
+        <div class="kpi-value">{{kpiData.avgEfficiency}}%</div>
+        <div class="kpi-change positive">
+          <span class="e-icons e-arrow-up"></span> {{kpiData.efficiencyChange}}%
+        </div>
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+        <span class="e-icons e-dollar"></span>
+      </div>
+      <div class="kpi-content">
+        <div class="kpi-label">Revenue (YTD)</div>
+        <div class="kpi-value">${{kpiData.totalRevenue | number}}</div>
+        <div class="kpi-change positive">
+          <span class="e-icons e-arrow-up"></span> {{kpiData.revenueChange}}%
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Dashboard Grid -->
+  <div class="dashboard-grid">
+    
+    <!-- Production Trends Chart -->
+    <div class="dashboard-card card-large">
+      <div class="card-header">
+        <h3>Production Trends</h3>
+        <ejs-dropdownlist [dataSource]="['Last 6 Months', 'Last Year', 'YTD']" value="Last 6 Months"></ejs-dropdownlist>
+      </div>
+      <div class="card-content">
+        <ejs-chart #chart [primaryXAxis]="primaryXAxis" [primaryYAxis]="primaryYAxis"
+                   [tooltip]="tooltip" [chartArea]="chartArea" [legendSettings]="legend">
+          <e-series-collection>
+            <e-series [dataSource]="productionData" type="Line" xName="month" yName="oil" 
+                     name="Oil Production" width="3" [marker]="marker" fill="#2C5F2D"></e-series>
+            <e-series [dataSource]="productionData" type="Line" xName="month" yName="gas" 
+                     name="Gas Production" width="3" [marker]="marker" fill="#00AEE0"></e-series>
+            <e-series [dataSource]="productionData" type="Line" xName="month" yName="water" 
+                     name="Water Production" width="3" [marker]="marker" fill="#F44336"></e-series>
+          </e-series-collection>
+        </ejs-chart>
+      </div>
+    </div>
+
+    <!-- Gauges Section -->
+    <div class="dashboard-card">
+      <div class="card-header">
+        <h3>Real-Time Pressure</h3>
+      </div>
+      <div class="card-content gauge-container">
+        <ejs-circulargauge>
+          <e-axes>
+            <e-axis [minimum]="0" [maximum]="3000" [ranges]="gaugeAxes[0].ranges" 
+                    [pointers]="gaugeAxes[0].pointers">
+              <e-pointers>
+                <e-pointer [value]="gaugeValue" type="Marker" markerShape="Triangle" 
+                          [markerHeight]="15" [markerWidth]="15" color="#757575">
+                </e-pointer>
+              </e-pointers>
+            </e-axis>
+          </e-axes>
+        </ejs-circulargauge>
+        <div class="gauge-label">{{gaugeValue | number:'1.0-0'}} PSI</div>
+      </div>
+    </div>
+
+    <div class="dashboard-card">
+      <div class="card-header">
+        <h3>Temperature Monitor</h3>
+      </div>
+      <div class="card-content gauge-container">
+        <ejs-lineargauge orientation="Vertical">
+          <e-axes>
+            <e-axis [minimum]="0" [maximum]="250">
+              <e-ranges>
+                <e-range [start]="0" [end]="150" color="#30B32D" [startWidth]="15" [endWidth]="15"></e-range>
+                <e-range [start]="150" [end]="200" color="#FFDD00" [startWidth]="15" [endWidth]="15"></e-range>
+                <e-range [start]="200" [end]="250" color="#F03E3E" [startWidth]="15" [endWidth]="15"></e-range>
+              </e-ranges>
+              <e-pointers>
+                <e-pointer [value]="temperatureValue" type="Bar" color="#0074E3"></e-pointer>
+              </e-pointers>
+            </e-axis>
+          </e-axes>
+        </ejs-lineargauge>
+        <div class="gauge-label">{{temperatureValue | number:'1.0-0'}}°F</div>
+      </div>
+    </div>
+
+    <!-- Production Mix Pie Chart -->
+    <div class="dashboard-card">
+      <div class="card-header">
+        <h3>Production Mix</h3>
+      </div>
+      <div class="card-content">
+        <ejs-accumulationchart [legendSettings]="{ visible: true, position: 'Bottom' }">
+          <e-accumulation-series-collection>
+            <e-accumulation-series [dataSource]="productionMixData" xName="type" yName="value" 
+                                  [dataLabel]="{ visible: true, name: 'text', position: 'Inside' }"
+                                  [palettes]="piePalette" type="Pie" [explode]="true" [explodeOffset]="10">
+            </e-accumulation-series>
+          </e-accumulation-series-collection>
+        </ejs-accumulationchart>
+      </div>
+    </div>
+
+    <!-- Well Performance Grid -->
+    <div class="dashboard-card card-full">
+      <div class="card-header">
+        <h3>Well Performance Overview</h3>
+        <div class="card-actions">
+          <button ejs-button cssClass="e-small e-success">
+            <span class="e-btn-icon e-icons e-add"></span> Add Well
+          </button>
+        </div>
+      </div>
+      <div class="card-content">
+        <ejs-grid #grid [dataSource]="wellData" [allowPaging]="true" [pageSettings]="pageSettings"
+                  [allowFiltering]="true" [filterSettings]="filterSettings" 
+                  [allowSorting]="true" [toolbar]="toolbar"
+                  (rowDataBound)="rowDataBound($event)" 
+                  (queryCellInfo)="queryCellInfo($event)"
+                  (toolbarClick)="toolbarClick($event)"
+                  [allowExcelExport]="true" [allowPdfExport]="true">
+          <e-columns>
+            <e-column field="wellId" headerText="Well ID" width="120" [template]="wellTemplate">
+              <ng-template #wellTemplate let-data>
+                <a href="javascript:void(0)" (click)="navigateToWell(data.wellId)" class="well-link">
+                  {{data.wellId}}
+                </a>
+              </ng-template>
+            </e-column>
+            <e-column field="status" headerText="Status" width="100" [template]="statusTemplate">
+              <ng-template #statusTemplate let-data>
+                <span class="status-badge" [ngClass]="'status-' + data.status.toLowerCase()">
+                  {{data.status}}
+                </span>
+              </ng-template>
+            </e-column>
+            <e-column field="oilRate" headerText="Oil Rate (bbl/day)" width="150" textAlign="Right" format="N0"></e-column>
+            <e-column field="gasRate" headerText="Gas Rate (mcf/day)" width="150" textAlign="Right" format="N0"></e-column>
+            <e-column field="pressure" headerText="Pressure (PSI)" width="140" textAlign="Right" format="N0"></e-column>
+            <e-column field="temperature" headerText="Temp (°F)" width="120" textAlign="Right" format="N0"></e-column>
+            <e-column field="efficiency" headerText="Efficiency %" width="130" textAlign="Right" format="N0"></e-column>
+            <e-column field="lastMaintenance" headerText="Last Maintenance" width="150" type="date" format="yMd"></e-column>
+            <e-column headerText="Actions" width="120" [template]="actionTemplate">
+              <ng-template #actionTemplate let-data>
+                <button ejs-button cssClass="e-small e-info" iconCss="e-icons e-eye">View</button>
+              </ng-template>
+            </e-column>
+          </e-columns>
+        </ejs-grid>
+      </div>
+    </div>
+
+    <!-- Real-Time Monitoring Chart -->
+    <div class="dashboard-card card-large">
+      <div class="card-header">
+        <h3>Real-Time Monitoring</h3>
+        <span class="live-indicator">
+          <span class="pulse"></span> Live
+        </span>
+      </div>
+      <div class="card-content">
+        <ejs-chart [primaryXAxis]="{ valueType: 'Category', title: 'Time' }" 
+                   [primaryYAxis]="{ title: 'Values' }"
+                   [tooltip]="{ enable: true }" [chartArea]="chartArea">
+          <e-series-collection>
+            <e-series [dataSource]="realTimeData" type="Spline" xName="time" yName="pressure" 
+                     name="Pressure" width="2" fill="#667eea"></e-series>
+            <e-series [dataSource]="realTimeData" type="Spline" xName="time" yName="flowRate" 
+                     name="Flow Rate" width="2" fill="#f093fb"></e-series>
+          </e-series-collection>
+        </ejs-chart>
+      </div>
+    </div>
+
+    <!-- Alerts & Notifications -->
+    <div class="dashboard-card">
+      <div class="card-header">
+        <h3>Alerts & Notifications</h3>
+      </div>
+      <div class="card-content">
+        <ejs-listview [dataSource]="[
+          { icon: 'e-warning', text: 'WELL-003 efficiency below target', type: 'warning', time: '10 min ago' },
+          { icon: 'e-error', text: 'WELL-005 offline - maintenance required', type: 'critical', time: '2 hours ago' },
+          { icon: 'e-info', text: 'Scheduled maintenance for WELL-001', type: 'info', time: '1 day ago' }
+        ]" [template]="alertTemplate">
+          <ng-template #alertTemplate let-data>
+            <div class="alert-item alert-{{data.type}}">
+              <span class="e-icons {{data.icon}}"></span>
+              <div class="alert-content">
+                <div class="alert-text">{{data.text}}</div>
+                <div class="alert-time">{{data.time}}</div>
+              </div>
+            </div>
+          </ng-template>
+        </ejs-listview>
+      </div>
+    </div>
+
+  </div>
+</div>

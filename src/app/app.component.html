@@ -1,0 +1,22 @@
+<div class="app-container">
+  <nav class="app-navbar">
+    <div class="navbar-brand">
+      <span class="brand-icon">⚡</span>
+      <h1>Oil Field Analytics</h1>
+    </div>
+    <div class="navbar-nav">
+      <a routerLink="/production-dashboard" routerLinkActive="active" class="nav-link">
+        <span class="nav-icon">📊</span>
+        Production Dashboard
+      </a>
+      <a routerLink="/dashboard-builder" routerLinkActive="active" class="nav-link">
+        <span class="nav-icon">🔧</span>
+        Dashboard Builder
+      </a>
+    </div>
+  </nav>
+  
+  <main class="app-content">
+    <router-outlet></router-outlet>
+  </main>
+</div>
