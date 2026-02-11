@@ -4,6 +4,24 @@
   min-height: 100vh;
 }
 
+.dashboard-blur-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(3px);
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.dashboard-blur-overlay.active {
+  opacity: 1;
+}
+
 /* Dashboard Header */
 .dashboard-header {
   background: white;

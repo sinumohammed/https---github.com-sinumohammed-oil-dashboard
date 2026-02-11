@@ -31,16 +31,19 @@ import { ListViewModule } from '@syncfusion/ej2-angular-lists';
 // Components
 import { OilFieldDashboardComponent } from './oil-field-dashboard.component';
 import { DashboardBuilderComponent } from './dashboard-builder.component';
+import { AiChatAssistantComponent } from './ai-chat-assistant.component';
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   declarations: [
     OilFieldDashboardComponent,
-    DashboardBuilderComponent
+    DashboardBuilderComponent,
+    AiChatAssistantComponent
   ],
   imports: [
     CommonModule,
     FormsModule,
-    
+    HttpClientModule,
     // Syncfusion Modules
     ChartModule,
     AccumulationChartModule,

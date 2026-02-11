@@ -1,0 +1,117 @@
+<div class="ai-chat-container" [class.chat-open]="isChatOpen">
+    <!-- Chat Toggle Button -->
+    <button class="chat-toggle-btn e-btn e-primary e-round" (click)="toggleChat()" [class.active]="isChatOpen">
+      <span class="chat-icon" *ngIf="!isChatOpen">
+        <span class="e-icons e-comment-show"></span>
+        <span class="notification-badge" *ngIf="messages.length > 0">AI</span>
+      </span>
+      <span class="close-icon e-icons e-close" *ngIf="isChatOpen"></span>
+    </button>
+  
+    <!-- Chat Window -->
+    <div class="chat-window" *ngIf="isChatOpen">
+      <!-- Header -->
+      <div class="chat-header">
+        <div class="header-content">
+          <div class="bot-avatar">
+            <span class="e-icons e-aiassist">🤖</span>
+          </div>
+          <div class="header-info">
+            <h3>Oil Field AI Assistant</h3>
+            <span class="status" [class.connected]="connectionStatus === 'connected'">
+              <span class="status-dot"></span>
+              {{ connectionStatus }}
+            </span>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button class="e-btn e-small e-flat e-round" (click)="clearChat()" title="Clear chat">
+            <span class="e-icons e-delete"></span>
+          </button>
+        </div>
+      </div>
+  
+      <!-- Quick Actions -->
+      <div class="quick-actions" *ngIf="messages.length <= 1">
+        <div class="quick-actions-title">Quick Actions</div>
+        <div class="quick-actions-grid">
+          <button *ngFor="let action of quickActions" 
+                  class="quick-action-btn"
+                  (click)="sendQuickAction(action)">
+            <span class="e-icons {{action.icon}}"></span>
+            <span class="action-text">{{action.text}}</span>
+          </button>
+        </div>
+      </div>
+  
+      <!-- Messages Area -->
+      <div class="messages-container" #messagesContainer>
+        <div class="messages-wrapper">
+          
+          <!-- Chat Messages -->
+          <div *ngFor="let message of messages" 
+               class="message" 
+               [class.user-message]="message.sender === 'user'"
+               [class.bot-message]="message.sender === 'bot'">
+            <div class="message-avatar">
+              <span *ngIf="message.sender === 'bot'" class="e-icons e-aiassist">🤖</span>
+              <span *ngIf="message.sender === 'user'" class="e-icons e-user">👤</span>
+            </div>
+            <div class="message-content">
+              <div class="message-bubble">
+                <p>{{ message.text }}</p>
+                
+                <!-- Dashboard action buttons if present -->
+                <div class="message-actions" *ngIf="message.data?.actions">
+                  <button *ngFor="let action of message.data.actions"
+                          class="action-chip"
+                          (click)="dashboardAction.emit(action)">
+                    <span class="e-icons {{action.icon}}"></span>
+                    {{action.label}}
+                  </button>
+                </div>
+              </div>
+              <span class="message-time">{{ formatTime(message.timestamp) }}</span>
+            </div>
+          </div>
+  
+          <!-- Typing Indicator -->
+          <div class="message bot-message" *ngIf="isTyping">
+            <div class="message-avatar">
+              <span class="e-icons e-aiassist">🤖</span>
+            </div>
+            <div class="message-content">
+              <div class="message-bubble typing-indicator">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Input Area -->
+      <div class="chat-input-area">
+        <div class="input-wrapper">
+          <input 
+            type="text" 
+            [(ngModel)]="userInput"
+            (keyup.enter)="sendMessage()"
+            placeholder="Ask about wells, production, alerts..."
+            class="chat-input e-input"
+            [disabled]="connectionStatus === 'disconnected'"
+          />
+          <button 
+            class="send-btn e-btn e-primary e-round" 
+            (click)="sendMessage()"
+            [disabled]="!userInput.trim() || connectionStatus === 'disconnected'">
+            <span class="e-icons e-send"></span>
+          </button>
+        </div>
+        <div class="input-hint" *ngIf="!userInput">
+          Try: "Show me WELL-001 status" or "What are today's alerts?"
+        </div>
+      </div>
+    </div>
+  </div>

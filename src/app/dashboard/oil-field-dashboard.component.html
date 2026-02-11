@@ -11,12 +11,13 @@
       </div>
     </div>
   </div>
-
+<!-- Dashboard blur overlay when chat is open -->
+<div class="dashboard-blur-overlay" [class.active]="isChatOpen"></div>
   <!-- KPI Cards -->
   <div class="kpi-section">
     <div class="kpi-card">
       <div class="kpi-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-        <span class="e-icons e-oil"></span>
+        <span class="e-icons e-user-defined"></span>
       </div>
       <div class="kpi-content">
         <div class="kpi-label">Total Production</div>
@@ -29,7 +30,7 @@
 
     <div class="kpi-card">
       <div class="kpi-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-        <span class="e-icons e-check-circle"></span>
+        <span class="e-icons e-paint-bucket"></span>
       </div>
       <div class="kpi-content">
         <div class="kpi-label">Active Wells</div>
@@ -42,7 +43,7 @@
 
     <div class="kpi-card">
       <div class="kpi-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
-        <span class="e-icons e-performance"></span>
+        <span class="e-icons e-sorting-2"></span>
       </div>
       <div class="kpi-content">
         <div class="kpi-label">Avg Efficiency</div>
@@ -55,7 +56,7 @@
 
     <div class="kpi-card">
       <div class="kpi-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
-        <span class="e-icons e-dollar"></span>
+        <span class="e-icons e-sorting-2"></span>
       </div>
       <div class="kpi-content">
         <div class="kpi-label">Revenue (YTD)</div>
@@ -250,3 +251,9 @@
 
   </div>
 </div>
+<!-- AI Chat Assistant - Add at the end -->
+<app-ai-chat-assistant 
+  [dashboardContext]="dashboardContext"
+  (chatOpenChange)="onChatOpenChange($event)"
+  (dashboardAction)="onDashboardAction($event)">
+</app-ai-chat-assistant>

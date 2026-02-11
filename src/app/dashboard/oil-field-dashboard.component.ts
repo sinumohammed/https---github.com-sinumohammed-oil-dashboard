@@ -180,8 +180,46 @@ export class OilFieldDashboardComponent implements OnInit {
 
   public piePalette: string[] = ['#2C5F2D', '#00AEE0', '#4A90E2'];
 
+   // Add chat integration properties
+   public isChatOpen: boolean = false;
+   public dashboardContext = {
+     currentView: 'main',
+     selectedWell: null,
+     dateRange: { start: new Date(), end: new Date() }
+   };
+
   ngOnInit(): void {
     this.simulateRealTimeData();
+  }
+
+  // Handle chat open/close
+  onChatOpenChange(isOpen: boolean): void {
+    this.isChatOpen = isOpen;
+  }
+
+  // Handle AI dashboard actions
+  onDashboardAction(action: any): void {
+    switch (action.type) {
+      case 'filter':
+        // Filter grid by well status
+        if (this.grid) {
+          this.grid.filterByColumn('status', 'equal', action.payload.value);
+        }
+        break;
+      case 'export':
+        // Export data
+        if (action.payload.format === 'excel') {
+          this.grid.excelExport();
+        }
+        break;
+      case 'navigate':
+        // Navigate to specific well
+        this.navigateToWell(action.payload.wellId);
+        break;
+      case 'refresh':
+        this.refreshDashboard();
+        break;
+    }
   }
 
   // Simulate real-time data updates

@@ -1,5 +1,9 @@
 /* Import Syncfusion Material Theme from CDN */
-@import url('https://cdn.syncfusion.com/ej2/20.4.38/material.css');
+@import url('https://cdn.syncfusion.com/ej2/32.1.19/ej2-icons/styles/material3.css');
+/* Add these imports at the top of src/styles.css */
+@import '@syncfusion/ej2-base/styles/material.css';
+@import '@syncfusion/ej2-buttons/styles/material.css';
+@import '@syncfusion/ej2-icons/styles/material.css';
 
 * {
   margin: 0;
