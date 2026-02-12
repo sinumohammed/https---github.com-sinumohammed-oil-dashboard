@@ -1,0 +1,202 @@
+<div class="data-config-overlay" *ngIf="isOpen" (click)="closeDialog()">
+    <div class="data-config-dialog" (click)="$event.stopPropagation()">
+      
+      <!-- Dialog Header -->
+      <div class="dialog-header">
+        <div class="header-content">
+          <h2>Configure Data Source</h2>
+          <p class="widget-info">{{ widgetTitle }} ({{ widgetType }})</p>
+        </div>
+        <button class="close-btn" (click)="closeDialog()">✕</button>
+      </div>
+  
+      <!-- Progress Steps -->
+      <div class="progress-steps">
+        <div class="step" [class.active]="currentStep === 1" [class.completed]="currentStep > 1">
+          <div class="step-number">1</div>
+          <div class="step-label">Select Data Source</div>
+        </div>
+        <div class="step-connector" [class.completed]="currentStep > 1"></div>
+        <div class="step" [class.active]="currentStep === 2" [class.completed]="currentStep > 2">
+          <div class="step-number">2</div>
+          <div class="step-label">Map Columns</div>
+        </div>
+        <div class="step-connector" [class.completed]="currentStep > 2"></div>
+        <div class="step" [class.active]="currentStep === 3">
+          <div class="step-number">3</div>
+          <div class="step-label">Preview & Save</div>
+        </div>
+      </div>
+  
+      <!-- Dialog Content -->
+      <div class="dialog-content">
+        
+        <!-- Step 1: Select Data Source -->
+        <div class="step-content" *ngIf="currentStep === 1">
+          <h3>Choose a Data Source</h3>
+          <p class="step-description">Select the table or API that contains your data</p>
+          
+          <div class="data-sources-grid" *ngIf="!isLoadingDataSources">
+            <div *ngFor="let source of dataSources" 
+                 class="data-source-card"
+                 [class.selected]="selectedDataSource?.id === source.id"
+                 (click)="selectDataSource(source)">
+              <div class="source-icon">
+                <span *ngIf="source.type === 'table'">📊</span>
+                <span *ngIf="source.type === 'api'">🔌</span>
+                <span *ngIf="source.type === 'file'">📁</span>
+              </div>
+              <div class="source-info">
+                <h4>{{ source.name }}</h4>
+                <span class="source-type">{{ source.type }}</span>
+              </div>
+              <div class="selection-indicator" *ngIf="selectedDataSource?.id === source.id">
+                ✓
+              </div>
+            </div>
+          </div>
+  
+          <div class="loading-state" *ngIf="isLoadingDataSources">
+            <div class="spinner"></div>
+            <p>Loading data sources...</p>
+          </div>
+        </div>
+  
+        <!-- Step 2: Map Columns -->
+        <div class="step-content" *ngIf="currentStep === 2">
+          <h3>Map Columns to Widget Fields</h3>
+          <p class="step-description">Match your data columns to the widget's required fields</p>
+  
+          <div class="column-mapping-container">
+            
+            <!-- Available Columns Panel -->
+            <div class="available-columns-panel">
+              <h4>Available Columns</h4>
+              <div class="columns-list" *ngIf="!isLoadingColumns">
+                <div *ngFor="let column of availableColumns" class="column-item">
+                  <span class="column-icon">{{ getColumnTypeIcon(column.type) }}</span>
+                  <div class="column-details">
+                    <span class="column-name">{{ column.name }}</span>
+                    <span class="column-type">{{ column.type }}</span>
+                  </div>
+                  <span class="column-sample" *ngIf="column.sample">
+                    {{ column.sample }}
+                  </span>
+                </div>
+              </div>
+              <div class="loading-state" *ngIf="isLoadingColumns">
+                <div class="spinner"></div>
+                <p>Loading columns...</p>
+              </div>
+            </div>
+  
+            <!-- Mapping Configuration -->
+            <div class="mapping-config-panel">
+              <h4>Field Mappings</h4>
+              <div class="mappings-list">
+                <div *ngFor="let mapping of columnMappings; let i = index" class="mapping-row">
+                  <div class="widget-field">
+                    <label>{{ mapping.displayName || mapping.widgetField }}</label>
+                    <span class="required-indicator">*</span>
+                  </div>
+                  <div class="mapping-arrow">→</div>
+                  <div class="source-column">
+                    <select [(ngModel)]="mapping.sourceColumn" class="column-select">
+                      <option value="">-- Select Column --</option>
+                      <option *ngFor="let col of availableColumns" [value]="col.name">
+                        {{ col.name }} ({{ col.type }})
+                      </option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+  
+              <!-- Add custom field button for grid -->
+              <button *ngIf="widgetType === 'grid'" 
+                      class="add-field-btn"
+                      (click)="columnMappings.push({ widgetField: 'custom', sourceColumn: '', displayName: 'Custom Field' })">
+                + Add Field
+              </button>
+            </div>
+          </div>
+        </div>
+  
+        <!-- Step 3: Preview & Save -->
+        <div class="step-content" *ngIf="currentStep === 3">
+          <h3>Preview Data</h3>
+          <p class="step-description">Review how your data will appear in the widget</p>
+  
+          <div class="preview-container">
+            <div class="config-summary">
+              <h4>Configuration Summary</h4>
+              <div class="summary-item">
+                <span class="summary-label">Data Source:</span>
+                <span class="summary-value">{{ selectedDataSource?.name }}</span>
+              </div>
+              <div class="summary-item">
+                <span class="summary-label">Fields Mapped:</span>
+                <span class="summary-value">{{ columnMappings.length }}</span>
+              </div>
+            </div>
+  
+            <div class="data-preview">
+              <h4>Sample Data (First 3 rows)</h4>
+              <div class="preview-table" *ngIf="!isLoadingPreview && previewData.length > 0">
+                <table>
+                  <thead>
+                    <tr>
+                      <th *ngFor="let mapping of columnMappings">
+                        {{ mapping.displayName || mapping.widgetField }}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let row of previewData.slice(0, 3)">
+                      <td *ngFor="let mapping of columnMappings">
+                        {{ row[mapping.sourceColumn] }}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="loading-state" *ngIf="isLoadingPreview">
+                <div class="spinner"></div>
+                <p>Loading preview...</p>
+              </div>
+              <div class="empty-state" *ngIf="!isLoadingPreview && previewData.length === 0">
+                <p>No preview data available</p>
+              </div>
+            </div>
+          </div>
+        </div>
+  
+      </div>
+  
+      <!-- Dialog Footer -->
+      <div class="dialog-footer">
+        <div class="footer-left">
+          <button class="btn-secondary" (click)="closeDialog()">Cancel</button>
+        </div>
+        <div class="footer-right">
+          <button *ngIf="currentStep > 1" 
+                  class="btn-secondary" 
+                  (click)="previousStep()">
+            ← Previous
+          </button>
+          <button *ngIf="currentStep < totalSteps" 
+                  class="btn-primary" 
+                  [disabled]="!canProceedToNextStep()"
+                  (click)="nextStep()">
+            Next →
+          </button>
+          <button *ngIf="currentStep === totalSteps" 
+                  class="btn-success" 
+                  [disabled]="!isConfigValid()"
+                  (click)="saveConfiguration()">
+            💾 Save Configuration
+          </button>
+        </div>
+      </div>
+  
+    </div>
+  </div>

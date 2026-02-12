@@ -72,7 +72,7 @@
   <div class="dashboard-grid">
     
     <!-- Production Trends Chart -->
-    <div class="dashboard-card card-large">
+    <div class="dashboard-card card-full">
       <div class="card-header">
         <h3>Production Trends</h3>
         <ejs-dropdownlist [dataSource]="['Last 6 Months', 'Last Year', 'YTD']" value="Last 6 Months"></ejs-dropdownlist>
@@ -143,14 +143,21 @@
         <h3>Production Mix</h3>
       </div>
       <div class="card-content">
-        <ejs-accumulationchart [legendSettings]="{ visible: true, position: 'Bottom' }">
+        <ejs-accumulationchart id="chart-container"  [legendSettings]="{ visible: false, position: 'Bottom' }">
           <e-accumulation-series-collection>
             <e-accumulation-series [dataSource]="productionMixData" xName="type" yName="value" 
                                   [dataLabel]="{ visible: true, name: 'text', position: 'Inside' }"
-                                  [palettes]="piePalette" type="Pie" [explode]="true" [explodeOffset]="10">
+                                  [palettes]="piePalette" type="Pie" [explode]="true">
             </e-accumulation-series>
           </e-accumulation-series-collection>
         </ejs-accumulationchart>
+        <!-- <ejs-accumulationchart id="chart-container" [legendSettings]="{ visible: false, position: 'Bottom' }">
+          <e-accumulation-series-collection>
+              <e-accumulation-series [dataSource]='productionMixData' xName='x' yName='y' 
+              [dataLabel]="{ visible: true, name: 'text', position: 'Inside' }"
+              [palettes]="piePalette" type="Pie" [explode]="true" ></e-accumulation-series>
+          </e-accumulation-series-collection>
+      </ejs-accumulationchart> -->
       </div>
     </div>
 

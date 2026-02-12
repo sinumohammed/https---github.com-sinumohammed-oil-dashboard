@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 // Syncfusion Modules
-import { ChartModule, AccumulationChartModule, SparklineModule } from '@syncfusion/ej2-angular-charts';
+import { ChartModule, AccumulationChartModule, SparklineModule, AccumulationChartAllModule } from '@syncfusion/ej2-angular-charts';
 import { 
   LineSeriesService, 
   ColumnSeriesService, 
@@ -33,11 +33,14 @@ import { OilFieldDashboardComponent } from './oil-field-dashboard.component';
 import { DashboardBuilderComponent } from './dashboard-builder.component';
 import { AiChatAssistantComponent } from './ai-chat-assistant.component';
 import { HttpClientModule } from '@angular/common/http';
+import { DataConfigDialogComponent } from '../components/data-config-dialog/data-config-dialog.component';
+import { DataConfigurationService } from '../service/data-configuration.service';
 
 @NgModule({
   declarations: [
     OilFieldDashboardComponent,
     DashboardBuilderComponent,
+    DataConfigDialogComponent,
     AiChatAssistantComponent
   ],
   imports: [
@@ -56,7 +59,8 @@ import { HttpClientModule } from '@angular/common/http';
     DropDownListModule,
     DateRangePickerModule,
     TextBoxModule,
-    ListViewModule
+    ListViewModule,
+    AccumulationChartAllModule
   ],
   providers: [
     // Chart Services
@@ -78,7 +82,9 @@ import { HttpClientModule } from '@angular/common/http';
     FilterService,
     ToolbarService,
     ExcelExportService,
-    PdfExportService
+    PdfExportService,
+
+    DataConfigurationService
   ],
   exports: [
     OilFieldDashboardComponent,
